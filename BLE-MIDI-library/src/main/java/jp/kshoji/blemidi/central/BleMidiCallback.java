@@ -40,11 +40,6 @@ import jp.kshoji.blemidi.util.BleMidiParser;
 import jp.kshoji.blemidi.util.BleUuidUtils;
 import jp.kshoji.blemidi.util.Constants;
 
-/**
- * BluetoothGattCallback implementation for BLE MIDI devices.
- *
- * @author K.Shoji
- */
 public final class BleMidiCallback extends BluetoothGattCallback {
     private final Map<String, Set<MidiInputDevice>> midiInputDevicesMap = new HashMap<>();
     private final Map<String, Set<MidiOutputDevice>> midiOutputDevicesMap = new HashMap<>();
