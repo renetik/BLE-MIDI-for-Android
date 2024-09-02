@@ -6,7 +6,6 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static jp.kshoji.blemidi.util.BleMidiDeviceUtils.getBleMidiScanFilters;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -64,20 +63,10 @@ public final class BleMidiCentralProvider {
             if (callbackType == CALLBACK_TYPE_ALL_MATCHES) {
                 final BluetoothDevice bluetoothDevice = result.getDevice();
                 if ((bluetoothDevice.getType() != DEVICE_TYPE_LE) &&
-                        (bluetoothDevice.getType() != DEVICE_TYPE_DUAL)) {
+                        (bluetoothDevice.getType() != DEVICE_TYPE_DUAL))
                     return;
-                }
-                if (!midiCallback.isConnected(bluetoothDevice)) {
-                    if (context instanceof Activity) {
-                        ((Activity) context).runOnUiThread(() -> connectGatt(bluetoothDevice));
-                    } else {
-                        if (Thread.currentThread() == context.getMainLooper().getThread()) {
-                            connectGatt(bluetoothDevice);
-                        } else {
-                            handler.post(() -> connectGatt(bluetoothDevice));
-                        }
-                    }
-                }
+                if (!midiCallback.isConnected(bluetoothDevice))
+                    handler.post(() -> connectGatt(bluetoothDevice));
             }
         }
     };
