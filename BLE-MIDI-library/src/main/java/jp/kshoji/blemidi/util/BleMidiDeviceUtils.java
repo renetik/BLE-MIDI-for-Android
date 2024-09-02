@@ -29,7 +29,7 @@ public final class BleMidiDeviceUtils {
     /**
      * Obtains BluetoothGattService for MIDI
      *
-     * @param context the context
+     * @param context       the context
      * @param bluetoothGatt the gatt of device
      * @return null if no service found
      */
@@ -53,7 +53,7 @@ public final class BleMidiDeviceUtils {
     /**
      * Obtains BluetoothGattCharacteristic for MIDI Input
      *
-     * @param context the context
+     * @param context              the context
      * @param bluetoothGattService the gatt service of device
      * @return null if no characteristic found
      */
@@ -77,7 +77,7 @@ public final class BleMidiDeviceUtils {
     /**
      * Obtains BluetoothGattCharacteristic for MIDI Output
      *
-     * @param context the context
+     * @param context              the context
      * @param bluetoothGattService the gatt service of device
      * @return null if no characteristic found
      */
@@ -98,17 +98,9 @@ public final class BleMidiDeviceUtils {
         return null;
     }
 
-    /**
-     * Obtains list of ScanFilter for BLE MIDI
-     *
-     * @param context the context
-     * @return list of {@link android.bluetooth.le.ScanFilter} for BLE MIDI devices.
-     */
     @NonNull
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static List<ScanFilter> getBleMidiScanFilters(@NonNull final Context context) {
         List<ScanFilter> scanFilters = new ArrayList<>();
-
         String[] uuidStringArray = context.getResources().getStringArray(R.array.uuidListForService);
         for (String uuidString : uuidStringArray) {
             scanFilters.add(new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuidString)).build());
@@ -131,9 +123,9 @@ public final class BleMidiDeviceUtils {
         String[] uuidStringArray = context.getResources().getStringArray(R.array.uuidListForService);
         for (String uuidString : uuidStringArray) {
             associationRequestBuilder.addDeviceFilter(
-                new BluetoothLeDeviceFilter.Builder().setScanFilter(
-                    new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuidString)).build()
-                ).build()
+                    new BluetoothLeDeviceFilter.Builder().setScanFilter(
+                            new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuidString)).build()
+                    ).build()
             );
         }
 
