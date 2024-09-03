@@ -143,7 +143,7 @@ public final class BleMidiDeviceUtils {
      * @return null if no service found
      */
     @Nullable
-    public static BluetoothGattService getDeviceInformationService(@NonNull final BluetoothGatt bluetoothGatt) {
+    public static BluetoothGattService deviceInformationService(@NonNull final BluetoothGatt bluetoothGatt) {
         List<BluetoothGattService> services = bluetoothGatt.getServices();
 
         for (BluetoothGattService service : services) {
@@ -169,7 +169,7 @@ public final class BleMidiDeviceUtils {
      * @return null if no characteristic found
      */
     @Nullable
-    public static BluetoothGattCharacteristic getManufacturerCharacteristic(@NonNull final BluetoothGattService bluetoothGattService) {
+    public static BluetoothGattCharacteristic manufacturerCharacteristic(@NonNull final BluetoothGattService bluetoothGattService) {
         List<BluetoothGattCharacteristic> characteristics = bluetoothGattService.getCharacteristics();
 
         for (BluetoothGattCharacteristic characteristic : characteristics) {
@@ -188,7 +188,7 @@ public final class BleMidiDeviceUtils {
      * @return null if no characteristic found
      */
     @Nullable
-    public static BluetoothGattCharacteristic getModelCharacteristic(@NonNull final BluetoothGattService bluetoothGattService) {
+    public static BluetoothGattCharacteristic modelCharacteristic(@NonNull final BluetoothGattService bluetoothGattService) {
         List<BluetoothGattCharacteristic> characteristics = bluetoothGattService.getCharacteristics();
 
         for (BluetoothGattCharacteristic characteristic : characteristics) {

@@ -108,16 +108,16 @@ public final class BleMidiCallback extends BluetoothGattCallback {
         }
         final String gattDeviceAddress = gatt.getDevice().getAddress();
         // Request to Device Information Service, to obtain manufacturer/model information
-        BluetoothGattService deviceInformationService = BleMidiDeviceUtils.getDeviceInformationService(gatt);
+        BluetoothGattService deviceInformationService = BleMidiDeviceUtils.deviceInformationService(gatt);
         if (deviceInformationService != null) {
-            final BluetoothGattCharacteristic manufacturerCharacteristic = BleMidiDeviceUtils.getManufacturerCharacteristic(deviceInformationService);
+            final BluetoothGattCharacteristic manufacturerCharacteristic = BleMidiDeviceUtils.manufacturerCharacteristic(deviceInformationService);
             if (manufacturerCharacteristic != null) {
                 gattRequestQueue.add(() -> {
                     // this calls onCharacteristicRead after completed
                     gatt.readCharacteristic(manufacturerCharacteristic);
                 });
             }
-            final BluetoothGattCharacteristic modelCharacteristic = BleMidiDeviceUtils.getModelCharacteristic(deviceInformationService);
+            final BluetoothGattCharacteristic modelCharacteristic = BleMidiDeviceUtils.modelCharacteristic(deviceInformationService);
             if (modelCharacteristic != null) {
                 gattRequestQueue.add(() -> {
                     // this calls onCharacteristicRead after completed
@@ -291,9 +291,7 @@ public final class BleMidiCallback extends BluetoothGattCallback {
             }
         }
         synchronized (gattRequestQueue) {
-            if (!gattRequestQueue.isEmpty()) {
-                gattRequestQueue.remove(0).run();
-            }
+            if (!gattRequestQueue.isEmpty()) gattRequestQueue.remove(0).run();
         }
     }
 
@@ -311,9 +309,7 @@ public final class BleMidiCallback extends BluetoothGattCallback {
         }
         Log.d(Constants.TAG, "Central onMtuChanged address: " + gatt.getDevice().getAddress() + ", mtu: " + mtu + ", status: " + status);
         synchronized (gattRequestQueue) {
-            if (!gattRequestQueue.isEmpty()) {
-                gattRequestQueue.remove(0).run();
-            }
+            if (!gattRequestQueue.isEmpty()) gattRequestQueue.remove(0).run();
         }
     }
 

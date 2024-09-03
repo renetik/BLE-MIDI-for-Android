@@ -5,6 +5,7 @@ import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_LE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_LATENCY;
+import static android.content.Context.MIDI_SERVICE;
 import static jp.kshoji.blemidi.util.BleMidiDeviceUtils.getBleMidiScanFilters;
 
 import android.annotation.SuppressLint;
@@ -18,6 +19,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.midi.MidiManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -68,8 +70,8 @@ public final class BleMidiCentralProvider {
                         (bluetoothDevice.getType() != DEVICE_TYPE_DUAL))
                     return;
                 if (!midiCallback.isConnected(bluetoothDevice)) {
-                    handler.post(() -> connectGatt(bluetoothDevice));
-                    bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
+                    MidiManager manager = (MidiManager) context.getSystemService(MIDI_SERVICE);
+                    manager.openBluetoothDevice(bluetoothDevice, device -> connectGatt(bluetoothDevice), handler);
                 }
             }
         }
@@ -92,7 +94,9 @@ public final class BleMidiCentralProvider {
         List<ScanFilter> scanFilters = getBleMidiScanFilters(context);
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(SCAN_MODE_LOW_LATENCY)
-                .setCallbackType(CALLBACK_TYPE_FIRST_MATCH).build();
+                .setCallbackType(CALLBACK_TYPE_ALL_MATCHES)
+//                .setLegacy(false) //TODO change api to min 26
+                .build();
         bluetoothLeScanner.startScan(scanFilters, scanSettings, scanCallback);
         isScanning = true;
         if (onMidiScanStatusListener != null) {
