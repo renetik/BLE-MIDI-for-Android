@@ -105,7 +105,6 @@ public final class BleMidiDeviceUtils {
         for (String uuidString : uuidStringArray) {
             scanFilters.add(new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuidString)).build());
         }
-
         return scanFilters;
     }
 

@@ -3,6 +3,8 @@ package jp.kshoji.blemidi.central;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_DUAL;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_LE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
+import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
+import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_LATENCY;
 import static jp.kshoji.blemidi.util.BleMidiDeviceUtils.getBleMidiScanFilters;
 
 import android.annotation.SuppressLint;
@@ -65,8 +67,10 @@ public final class BleMidiCentralProvider {
                 if ((bluetoothDevice.getType() != DEVICE_TYPE_LE) &&
                         (bluetoothDevice.getType() != DEVICE_TYPE_DUAL))
                     return;
-                if (!midiCallback.isConnected(bluetoothDevice))
+                if (!midiCallback.isConnected(bluetoothDevice)) {
                     handler.post(() -> connectGatt(bluetoothDevice));
+                    bluetoothAdapter.getBluetoothLeScanner().stopScan(scanCallback);
+                }
             }
         }
     };
@@ -86,7 +90,9 @@ public final class BleMidiCentralProvider {
     public void startScanDevice(int timeoutInMilliSeconds) throws SecurityException {
         BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         List<ScanFilter> scanFilters = getBleMidiScanFilters(context);
-        ScanSettings scanSettings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+        ScanSettings scanSettings = new ScanSettings.Builder()
+                .setScanMode(SCAN_MODE_LOW_LATENCY)
+                .setCallbackType(CALLBACK_TYPE_FIRST_MATCH).build();
         bluetoothLeScanner.startScan(scanFilters, scanSettings, scanCallback);
         isScanning = true;
         if (onMidiScanStatusListener != null) {
