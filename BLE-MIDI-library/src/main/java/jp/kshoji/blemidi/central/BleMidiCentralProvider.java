@@ -3,10 +3,8 @@ package jp.kshoji.blemidi.central;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_DUAL;
 import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_LE;
 import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES;
-import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_FIRST_MATCH;
 import static android.bluetooth.le.ScanSettings.SCAN_MODE_LOW_LATENCY;
 import static android.content.Context.MIDI_SERVICE;
-import static jp.kshoji.blemidi.util.BleMidiDeviceUtils.getBleMidiScanFilters;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
@@ -21,12 +19,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.midi.MidiManager;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import jp.kshoji.blemidi.R;
 import jp.kshoji.blemidi.device.MidiInputDevice;
 import jp.kshoji.blemidi.device.MidiOutputDevice;
 import jp.kshoji.blemidi.listener.OnMidiDeviceAttachedListener;
@@ -91,7 +92,12 @@ public final class BleMidiCentralProvider {
 
     public void startScanDevice(int timeoutInMilliSeconds) throws SecurityException {
         BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-        List<ScanFilter> scanFilters = getBleMidiScanFilters(context);
+        List<ScanFilter> scanFilters1 = new ArrayList<>();
+        String[] uuidStringArray = context.getResources().getStringArray(R.array.uuidListForService);
+        for (String uuidString : uuidStringArray) {
+            scanFilters1.add(new ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString(uuidString)).build());
+        }
+        List<ScanFilter> scanFilters = scanFilters1;
         ScanSettings scanSettings = new ScanSettings.Builder()
                 .setScanMode(SCAN_MODE_LOW_LATENCY)
                 .setCallbackType(CALLBACK_TYPE_ALL_MATCHES)
