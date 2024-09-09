@@ -634,7 +634,7 @@ public final class BleMidiPeripheralProvider {
         @NonNull
         @Override
         public String getDeviceName() throws SecurityException {
-            return "";
+            return bluetoothDevice.getName();
         }
 
         @NonNull
@@ -692,7 +692,7 @@ public final class BleMidiPeripheralProvider {
         @NonNull
         @Override
         public String getDeviceName() throws SecurityException {
-            return "";
+            return bluetoothDevice.getName();
         }
 
         @NonNull
