@@ -23,7 +23,6 @@ import jp.kshoji.blemidi.util.Constants;
  *
  * @author K.Shoji
  */
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 abstract class AbstractBleMidiService extends Service {
 
     private final Set<MidiInputDevice> midiInputDevices = new HashSet<>();
