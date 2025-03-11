@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "jp.kshoji.blemidi.sample"
         minSdkVersion 18
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 3
         versionName "1.2"
     }
