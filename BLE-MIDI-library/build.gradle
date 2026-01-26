@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdk project.properties.sdk_version
+    compileSdk = project.properties.sdk_version
 
     defaultConfig {
-        minSdkVersion project.properties.min_sdk_version
-        targetSdkVersion project.properties.sdk_version
+        minSdkVersion = project.properties.min_sdk_version
+        targetSdkVersion = project.properties.sdk_version
     }
 
     compileOptions {
@@ -36,12 +36,12 @@ android {
             withSourcesJar()
         }
     }
-    namespace 'jp.kshoji.blemidi'
+    namespace = 'jp.kshoji.blemidi'
 }
 
 repositories {
     maven {
-        url 'https://github.com/kshoji/javax.sound.midi-for-Android/raw/master/javax.sound.midi/repository'
+        url = 'https://github.com/kshoji/javax.sound.midi-for-Android/raw/master/javax.sound.midi/repository'
     }
     mavenCentral()
 }

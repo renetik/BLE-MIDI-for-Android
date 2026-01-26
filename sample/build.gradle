@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk 35
+    compileSdk = 35
 
     defaultConfig {
         applicationId "jp.kshoji.blemidi.sample"
-        minSdkVersion 18
-        targetSdkVersion 35
+        minSdkVersion = 18
+        targetSdkVersion = 35
         versionCode 3
         versionName "1.2"
     }
@@ -22,12 +22,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'jp.kshoji.blemidi.sample'
+    namespace = 'jp.kshoji.blemidi.sample'
 }
 
 repositories {
     maven {
-        url 'https://github.com/kshoji/javax.sound.midi-for-Android/raw/master/javax.sound.midi/repository'
+        url = 'https://github.com/kshoji/javax.sound.midi-for-Android/raw/master/javax.sound.midi/repository'
     }
     mavenCentral()
 }
