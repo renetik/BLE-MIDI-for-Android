@@ -9,7 +9,7 @@
 }
 
 -keepparameternames
--renamesourcefileattribute SourceFile
+#-renamesourcefileattribute SourceFile
 -keepattributes Signature,Exceptions,*Annotation*,
                 InnerClasses,PermittedSubclasses,EnclosingMethod,
                 Deprecated,SourceFile,LineNumberTable
