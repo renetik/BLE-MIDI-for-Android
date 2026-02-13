@@ -2,24 +2,19 @@ plugins {
     id 'com.android.library'
     id 'maven-publish'
 }
-
 android {
     compileSdk = project.properties.sdk_version
-
     defaultConfig {
-        minSdkVersion  project.properties.min_sdk_version
-        targetSdkVersion   project.properties.sdk_version
+        minSdkVersion project.properties.min_sdk_version
+        targetSdkVersion project.properties.sdk_version
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
-
     defaultConfig {
         consumerProguardFiles 'proguard-rules.pro'
     }
-
     buildTypes {
         debug {
             minifyEnabled false
@@ -28,7 +23,6 @@ android {
             minifyEnabled false
         }
     }
-
     publishing {
         singleVariant('release') {
             withSourcesJar()
