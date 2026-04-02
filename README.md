@@ -1,4 +1,4 @@
-BLE MIDI for Android
+BLE MIDI for Android.
 ====================
 [![Build Status](https://jitpack.io/v/kshoji/BLE-MIDI-for-Android.svg)](https://jitpack.io/#kshoji/BLE-MIDI-for-Android)
 
