@@ -3,7 +3,6 @@ package jp.kshoji.blemidi.device;
 import android.support.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Represents BLE MIDI Output Device
@@ -15,6 +14,10 @@ public abstract class MidiOutputDevice {
     public static final int MAX_TIMESTAMP = 8192;
 
     final ByteArrayOutputStream transferDataStream = new ByteArrayOutputStream();
+
+    /** Scratch space for one MIDI message, only ever touched while holding the
+     * {@link #transferDataStream} monitor. */
+    private final byte[] messageBuffer = new byte[3];
 
     /**
      * Transfer data
@@ -150,13 +153,23 @@ public abstract class MidiOutputDevice {
     }
 
     transient int writtenDataCount;
-    private void storeTransferData(byte[] data) {
+
+    /**
+     * Queues one MIDI message. Writes the bytes straight into the transfer stream so a
+     * real time caller allocates nothing per message.
+     *
+     * @param timestamp 0-8191, the BLE MIDI millisecond timestamp for this message
+     * @param byte1 the first byte
+     * @param byte2 the second byte, ignored when count is below 2
+     * @param byte3 the third byte, ignored when count is below 3
+     * @param count how many of the three bytes are part of the message, 1-3
+     */
+    private void storeTransferData(long timestamp, int byte1, int byte2, int byte3, int count) {
         if (!transferDataThreadAlive || !isRunning) {
             return;
         }
 
         synchronized (transferDataStream) {
-            long timestamp = System.currentTimeMillis() % MAX_TIMESTAMP;
             if (writtenDataCount == 0) {
                 // Store timestamp high
                 transferDataStream.write((byte) (0x80 | ((timestamp >> 7) & 0x3f)));
@@ -165,14 +178,31 @@ public abstract class MidiOutputDevice {
             // timestamp low
             transferDataStream.write((byte) (0x80 | (timestamp & 0x7f)));
             writtenDataCount++;
-            try {
-                transferDataStream.write(data);
-                writtenDataCount += data.length;
-            } catch (IOException ignored) {
-            }
+
+            messageBuffer[0] = (byte) byte1;
+            messageBuffer[1] = (byte) byte2;
+            messageBuffer[2] = (byte) byte3;
+            transferDataStream.write(messageBuffer, 0, count);
+            writtenDataCount += count;
 
             transferDataThread.interrupt();
         }
+    }
+
+    /**
+     * Converts a {@link System#nanoTime()} stamp into this device's 13 bit millisecond
+     * timestamp, keeping how far ahead of now the stamp is so scheduled messages carry
+     * their intended timing instead of their enqueue time.
+     *
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     * @return 0-8191
+     */
+    private static long timestampOf(long timestampNanos) {
+        long millis = System.currentTimeMillis();
+        if (timestampNanos != 0L) {
+            millis += (timestampNanos - System.nanoTime()) / 1000000L;
+        }
+        return ((millis % MAX_TIMESTAMP) + MAX_TIMESTAMP) % MAX_TIMESTAMP;
     }
 
     /**
@@ -181,7 +211,7 @@ public abstract class MidiOutputDevice {
      * @param byte1 the first byte
      */
     private void sendMidiMessage(int byte1) {
-        storeTransferData(new byte[] { (byte) byte1 });
+        storeTransferData(timestampOf(0L), byte1, 0, 0, 1);
     }
 
     /**
@@ -191,7 +221,7 @@ public abstract class MidiOutputDevice {
      * @param byte2 the second byte
      */
     private void sendMidiMessage(int byte1, int byte2) {
-        storeTransferData(new byte[] { (byte) byte1, (byte) byte2 });
+        storeTransferData(timestampOf(0L), byte1, byte2, 0, 2);
     }
 
     /**
@@ -202,7 +232,7 @@ public abstract class MidiOutputDevice {
      * @param byte3 the third byte
      */
     private void sendMidiMessage(int byte1, int byte2, int byte3) {
-        storeTransferData(new byte[] { (byte) byte1, (byte) byte2, (byte) byte3 });
+        storeTransferData(timestampOf(0L), byte1, byte2, byte3, 3);
     }
 
     /**
@@ -276,6 +306,55 @@ public abstract class MidiOutputDevice {
      */
     public final void sendMidiNoteOn(int channel, int note, int velocity) {
         sendMidiMessage(0x90 | (channel & 0xf), note, velocity);
+    }
+
+    /**
+     * Note-off at a scheduled time
+     *
+     * @param channel 0-15
+     * @param note 0-127
+     * @param velocity 0-127
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     */
+    public final void sendMidiNoteOff(int channel, int note, int velocity, long timestampNanos) {
+        storeTransferData(timestampOf(timestampNanos),
+                0x80 | (channel & 0xf), note, velocity, 3);
+    }
+
+    /**
+     * Note-on at a scheduled time
+     *
+     * @param channel 0-15
+     * @param note 0-127
+     * @param velocity 0-127
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     */
+    public final void sendMidiNoteOn(int channel, int note, int velocity, long timestampNanos) {
+        storeTransferData(timestampOf(timestampNanos),
+                0x90 | (channel & 0xf), note, velocity, 3);
+    }
+
+    /**
+     * Control Change at a scheduled time
+     *
+     * @param channel 0-15
+     * @param function 0-127
+     * @param value 0-127
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     */
+    public final void sendMidiControlChange(int channel, int function, int value,
+                                            long timestampNanos) {
+        storeTransferData(timestampOf(timestampNanos),
+                0xb0 | (channel & 0xf), function, value, 3);
+    }
+
+    /**
+     * Start Playing at a scheduled time
+     *
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     */
+    public final void sendMidiStart(long timestampNanos) {
+        storeTransferData(timestampOf(timestampNanos), 0xfa, 0, 0, 1);
     }
 
     /**
