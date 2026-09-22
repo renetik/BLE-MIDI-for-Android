@@ -19,6 +19,11 @@ public abstract class MidiOutputDevice {
      * {@link #transferDataStream} monitor. */
     private final byte[] messageBuffer = new byte[3];
 
+    /** First timestamp of the packet being assembled. The header fixes the timestamp
+     * high bits from it, so every later message in the packet is expressed relative to
+     * it. Only ever touched while holding the {@link #transferDataStream} monitor. */
+    private long packetTimestamp;
+
     /**
      * Transfer data
      *
@@ -171,12 +176,25 @@ public abstract class MidiOutputDevice {
 
         synchronized (transferDataStream) {
             if (writtenDataCount == 0) {
+                packetTimestamp = timestamp;
                 // Store timestamp high
-                transferDataStream.write((byte) (0x80 | ((timestamp >> 7) & 0x3f)));
+                transferDataStream.write((byte) (0x80 | ((packetTimestamp >> 7) & 0x3f)));
                 writtenDataCount++;
             }
-            // timestamp low
-            transferDataStream.write((byte) (0x80 | (timestamp & 0x7f)));
+
+            // The header already fixed the high bits, so the low byte has to be read
+            // against packetTimestamp. Anything outside the packet's 128ms bucket is
+            // clamped to its nearest edge, because sending the raw low bits would move
+            // the message a whole bucket the wrong way.
+            long delta = timestamp - packetTimestamp;
+            if (delta > MAX_TIMESTAMP / 2) delta -= MAX_TIMESTAMP;
+            else if (delta < -MAX_TIMESTAMP / 2) delta += MAX_TIMESTAMP;
+
+            long timestampLow = (packetTimestamp & 0x7f) + delta;
+            if (timestampLow < 0) timestampLow = 0;
+            else if (timestampLow > 0x7f) timestampLow = 0x7f;
+
+            transferDataStream.write((byte) (0x80 | timestampLow));
             writtenDataCount++;
 
             messageBuffer[0] = (byte) byte1;
