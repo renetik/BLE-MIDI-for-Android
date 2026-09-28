@@ -469,6 +469,15 @@ public abstract class MidiOutputDevice {
     }
 
     /**
+     * Timing Clock at a scheduled time
+     *
+     * @param timestampNanos a {@link System#nanoTime()} value, or 0 for now
+     */
+    public final void sendMidiTimingClock(long timestampNanos) {
+        storeTransferData(timestampOf(timestampNanos), 0xf8, 0, 0, 1);
+    }
+
+    /**
      * Start Playing
      */
     public final void sendMidiStart() {
