@@ -314,13 +314,16 @@ public final class BleMidiPeripheralProvider {
 
         synchronized (midiInputDevicesMap) {
             for (MidiInputDevice midiInputDevice : midiInputDevicesMap.values()) {
-                ((InternalMidiInputDevice) midiInputDevice).stop();
+                midiInputDevice.terminate();
                 midiInputDevice.setOnMidiInputEventListener(null);
             }
             midiInputDevicesMap.clear();
         }
 
         synchronized (midiOutputDevicesMap) {
+            for (MidiOutputDevice midiOutputDevice : midiOutputDevicesMap.values()) {
+                midiOutputDevice.terminate();
+            }
             midiOutputDevicesMap.clear();
         }
     }
@@ -373,6 +376,7 @@ public final class BleMidiPeripheralProvider {
                         if (midiOutputDevice != null) {
                             midiOutputDevicesMap.remove(deviceAddress);
 
+                            midiOutputDevice.terminate();
                             if (midiDeviceDetachedListener != null) {
                                 midiDeviceDetachedListener.onMidiOutputDeviceDetached(midiOutputDevice);
                             }
