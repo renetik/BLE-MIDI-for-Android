@@ -76,13 +76,11 @@ public abstract class MidiOutputDevice {
         return getDeviceName();
     }
 
-    volatile boolean transferDataThreadAlive;
+    volatile boolean transferDataThreadAlive = true;
     volatile boolean isRunning;
     final Thread transferDataThread = new Thread(new Runnable() {
         @Override
         public void run() {
-            transferDataThreadAlive = true;
-
             while (true) {
                 // running
                 while (transferDataThreadAlive && isRunning) {
@@ -107,7 +105,7 @@ public abstract class MidiOutputDevice {
                 }
 
                 // stopping
-                while (!transferDataThreadAlive && !isRunning) {
+                while (transferDataThreadAlive && !isRunning) {
                     // sleep until interrupt
                     try {
                         Thread.sleep(10);
